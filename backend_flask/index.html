@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h2>Upload Image</h2>
+
+    <form id="imgForm">
+      <input type="file" id="imgInput" name="imgInput" />
+      <input type="submit" />
+    </form>
+    <table>
+      <tr>
+        <th>Nutrient</th>
+        <th>Value</th>
+      </tr>
+      <tr>
+        <td>Calories</td>
+        <td id="nf_calories"></td>
+      </tr>
+      <tr>
+        <td>Protein</td>
+        <td id="nf_protein"></td>
+      </tr>
+      <tr>
+        <td>Sugars</td>
+        <td id="nf_sugars"></td>
+      </tr>
+    </table>
+  </body>
+  <script>
+    document
+      .getElementById("imgForm")
+      .addEventListener("submit", function (event) {
+        event.preventDefault();
+
+        var formData = new FormData();
+        var imagefile = document.querySelector("#imgInput");
+        formData.append("image", imagefile.files[0]);
+
+        fetch("http://localhost:5000/predict", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            var response = data.foods[0];
+            var keysToUpdate = [
+              "nf_calories",
+              "nf_protein",
+              "nf_sugars",
+              "nf_total_fat",
+            ];
+            for (var key in response) {
+              if (response.hasOwnProperty(key) && keysToUpdate.includes(key)) {
+                var value = response[key];
+                // console.log(key, value);
+                document.getElementById(key).innerHTML = value;
+              }
+            }
+            console.log(data.foods);
+          })
+          .catch((error) => console.error(error));
+      });
+  </script>
+</html>
